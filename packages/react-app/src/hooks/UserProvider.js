@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Web3Provider } from "@ethersproject/providers";
-import BurnerProvider from "burner-provider";
+//import BurnerProvider from "burner-provider";
+import Arkane from "@arkane-network/web3-arkane-provider";
 import { INFURA_ID } from "../constants";
 
 const useUserProvider = (injectedProvider, localProvider) =>
@@ -11,7 +12,12 @@ useMemo(() => {
   }
   if (!localProvider) return undefined;
 
-  let burnerConfig = {}
+  let burnerConfig = {
+    clientId: 'Creative-Platform',
+    environment: 'staging',
+    signMethod: 'POPUP', //optional, REDIRECT by default
+    bearerTokenProvider: () => 'obtained_bearer_token', //optional, default undefined
+  }
 
   if(window.location.pathname){
     if(window.location.pathname.indexOf("/pk")>=0){
@@ -31,15 +37,15 @@ useMemo(() => {
     }
   }
 
-  console.log("🔥 Using burner provider",burnerConfig);
+  console.log("🔥 Using burner provider", burnerConfig);
   if (localProvider.connection && localProvider.connection.url) {
     burnerConfig.rpcUrl = localProvider.connection.url
-    return new Web3Provider(new BurnerProvider(burnerConfig));
+    return Arkane;
   }else{
     // eslint-disable-next-line no-underscore-dangle
     const networkName = localProvider._network && localProvider._network.name;
     burnerConfig.rpcUrl = `https://${networkName || "mainnet"}.infura.io/v3/${INFURA_ID}`
-    return new Web3Provider(new BurnerProvider(burnerConfig));
+    return Arkane;
   }
 }, [injectedProvider, localProvider]);
 
